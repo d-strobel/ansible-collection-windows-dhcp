@@ -1,0 +1,17 @@
+namespace: d_strobel
+name: dhcp
+version: 0.1.0
+readme: README.md
+authors:
+  - Dustin Strobel @d-strobel
+description: |
+  Ansible collection for Windows DHCP Server
+license_file: LICENSE
+tags:
+  - windows
+dependencies: {}
+repository: https://github.com/d-strobel/ansible-collection-windows-dhcp
+documentation: https://github.com/d-strobel/ansible-collection-windows-dhcp
+homepage: https://github.com/d-strobel/ansible-collection-windows-dhcp
+issues: https://github.com/d-strobel/ansible-collection-windows-dhcp/issues
+build_ignore: []
