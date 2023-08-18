@@ -147,5 +147,36 @@ if (
     }
 }
 
+# Compare scopes
+$scopesToCompare = @()
+$dhcpServersFailover.ScopeId | ForEach-Object {
+    $scopesToCompare += $_.IPAddressToString
+}
+
+$compareScopes = Compare-Object -ReferenceObject $scopesToCompare -DifferenceObject $scopeId
+
+# Add scopes
+$scopesToAdd = $compareScopes | Where-Object {$_.SideIndicator -eq "=>"} | Select-Object -ExpandProperty InputObject
+if ($scopesToAdd) {
+    try {
+        Add-DhcpServerv4FailoverScope -Name $name -ScopeId $scopesToAdd -Confirm:$false
+        $module.Result.changed = $true
+    }
+    catch {
+        $module.FailJson("Failed to add the following scopes: $scopesToAdd", $Error[0])
+    }
+}
+
+# Remove scopes
+$scopesToRemove = $compareScopes | Where-Object {$_.SideIndicator -eq "<="} | Select-Object -ExpandProperty InputObject
+if ($scopesToRemove) {
+    try {
+        Remove-DhcpServerv4FailoverScope -Name $name -ScopeId $scopesToRemove -Confirm:$false
+        $module.Result.changed = $true
+    }
+    catch {
+        $module.FailJson("Failed to remove the following scopes: $scopesToRemove", $Error[0])
+    }
+}
 
 $module.ExitJson()
