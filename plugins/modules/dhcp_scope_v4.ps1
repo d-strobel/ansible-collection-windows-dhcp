@@ -38,9 +38,10 @@ $ErrorActionPreference = 'Stop'
 
 # Check scope
 [IPAddress]$scopeCalculator = (([IPAddress]$startRange).Address -band ([IPAddress]$subnetMask).Address)
+$validScope = $scopeCalculator.IPAddressToString
 
 if ($scopeCalculator.IPAddressToString -ne $scopeId) {
-    $module.FailJson("The scope does not match with the dhcp scope range. For the specified range the scope should be '$($scopeCalculator.IPAddressToString)'", $Error[0])
+    $module.FailJson("The scope does not match with the dhcp scope range. For the specified range the scope should be '$validScope'")
 }
 
 # Scope state
@@ -52,12 +53,7 @@ else {
 }
 
 # Get scope
-try {
-    $dhcpServersScope = Get-DhcpServerv4Scope -ScopeId $scopeId
-}
-catch {
-    $module.FailJson("Failed to get the dhcp server scope '$scopeId'", $Error[0])
-}
+$dhcpServersScope = Get-DhcpServerv4Scope -ScopeId $scopeId -ErrorAction SilentlyContinue
 
 # Remove scope
 if (($null -ne $dhcpServersScope) -and ($state -eq "absent")) {
