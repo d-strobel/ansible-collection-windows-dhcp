@@ -70,7 +70,7 @@ if (($null -ne $dhcpServersScope) -and ($state -eq "absent")) {
     }
 }
 # New scope
-elseif (($null -eq $dhcpServersScope) -and ($state -eq "present")) {
+elseif (($null -eq $dhcpServersScope) -and ($state -match "present|inactive")) {
     try {
         Add-DhcpServerv4Scope `
             -StartRange $startRange `
