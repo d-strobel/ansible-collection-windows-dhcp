@@ -6,4 +6,6 @@ Ansible collection for Windows DHCP Server.
 - Work in progress
 
 ## Ready to go modules
-Coming soon.
+- dhcp_domain_authorization
+- dhcp_scope_v4
+- dhcp_failover_v4

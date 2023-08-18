@@ -32,6 +32,12 @@ options:
     - Specify a shared secret for the failover relationship.
     type: str
     required: false
+  shared_secret_update:
+    description:
+    - Define how the shared secret should be updated.
+    type: str
+    required: false
+    choices: [ always, never ]
   mode:
     description:
     - Define the mode for the failover relationship.
