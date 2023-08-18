@@ -55,6 +55,11 @@ else {
 # Get scope
 $dhcpServersScope = Get-DhcpServerv4Scope -ScopeId $scopeId -ErrorAction SilentlyContinue
 
+# Early exit
+if (($null -eq $dhcpServersScope) -and ($state -eq "absent")) {
+    $module.ExitJson()
+}
+
 # Remove scope
 if (($null -ne $dhcpServersScope) -and ($state -eq "absent")) {
     try {

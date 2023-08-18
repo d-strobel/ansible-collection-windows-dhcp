@@ -46,6 +46,11 @@ $ErrorActionPreference = 'Stop'
 # Get failover
 $dhcpServersFailover = Get-DhcpServerv4Failover -Name $name -ErrorAction SilentlyContinue
 
+# Early exit
+if (($null -eq $dhcpServersFailover) -and ($state -eq "absent")) {
+    $module.ExitJson()
+}
+
 # Remove failover
 if (($null -ne $dhcpServersFailover) -and ($state -eq "absent")) {
     try {
