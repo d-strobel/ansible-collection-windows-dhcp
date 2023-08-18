@@ -60,23 +60,45 @@ if (($null -ne $dhcpServersFailover) -and ($state -eq "absent")) {
 # New failover
 if (($null -eq $dhcpServersFailover) -and ($state -eq "present")) {
     try {
-        if ($mode -eq "loadbalance") {
-            Add-DhcpServerv4Failover `
-                -Name $name `
-                -PartnerServer $partnerServer `
-                -ScopeId $scopeId `
-                -SharedSecret $sharedSecret `
-                -LoadBalancePercent $loadbalancePercent `
-                -Confirm:$false
+        if ($sharedSecret) {
+            if ($mode -eq "loadbalance") {
+                Add-DhcpServerv4Failover `
+                    -Name $name `
+                    -PartnerServer $partnerServer `
+                    -ScopeId $scopeId `
+                    -SharedSecret $sharedSecret `
+                    -LoadBalancePercent $loadbalancePercent `
+                    -Confirm:$false `
+                    -Force
+            }
+            else {
+                Add-DhcpServerv4Failover `
+                    -Name $name `
+                    -PartnerServer $partnerServer `
+                    -ScopeId $scopeId `
+                    -SharedSecret $sharedSecret `
+                    -ServerRole $serverRole `
+                    -Confirm:$false `
+                    -Force
+            }
         }
         else {
-            Add-DhcpServerv4Failover `
-                -Name $name `
-                -PartnerServer $partnerServer `
-                -ScopeId $scopeId `
-                -SharedSecret $sharedSecret `
-                -ServerRole $serverRole `
-                -Confirm:$false
+            if ($mode -eq "loadbalance") {
+                Add-DhcpServerv4Failover `
+                    -Name $name `
+                    -PartnerServer $partnerServer `
+                    -ScopeId $scopeId `
+                    -LoadBalancePercent $loadbalancePercent `
+                    -Confirm:$false
+            }
+            else {
+                Add-DhcpServerv4Failover `
+                    -Name $name `
+                    -PartnerServer $partnerServer `
+                    -ScopeId $scopeId `
+                    -ServerRole $serverRole `
+                    -Confirm:$false
+            }
         }
 
         $module.Result.changed = $true
