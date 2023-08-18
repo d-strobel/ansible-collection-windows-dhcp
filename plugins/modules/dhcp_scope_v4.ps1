@@ -60,13 +60,15 @@ if (($null -ne $dhcpServersScope) -and ($state -eq "absent")) {
     try {
         Remove-DhcpServerv4Scope -ScopeId $scopeId -Confirm:$false | Out-Null
         $module.Result.changed = $true
+        $module.ExitJson()
     }
     catch {
         $module.FailJson("Failed to remove the scope '$scopeId'", $Error[0])
     }
 }
+
 # New scope
-elseif (($null -eq $dhcpServersScope) -and ($state -match "present|inactive")) {
+if (($null -eq $dhcpServersScope) -and ($state -match "present|inactive")) {
     try {
         Add-DhcpServerv4Scope `
             -StartRange $startRange `
@@ -78,9 +80,37 @@ elseif (($null -eq $dhcpServersScope) -and ($state -match "present|inactive")) {
             -Type $type
 
         $module.Result.changed = $true
+        $module.ExitJson()
     }
     catch {
         $module.FailJson("Failed to add the scope '$scopeId'", $Error[0])
+    }
+}
+
+# Compare changes
+if (
+    ($dhcpServersScope.StartRange -ne $startRange) -or
+    ($dhcpServersScope.EndRange -ne $endRange) -or
+    ($dhcpServersScope.Name.Trim() -ne $name) -or
+    ($dhcpServersScope.Description.Trim() -ne $description) -or
+    ($dhcpServersScope.Type -ne $type) -or
+    ($dhcpServersScope.State -ne $scopeState)
+) {
+    try {
+        Set-DhcpServerv4Scope `
+            -ScopeId $scopeId `
+            -StartRange $startRange `
+            -EndRange $endRange `
+            -Name $name`
+            -Description $description`
+            -State $scopeState `
+            -Type $type `
+            -Confirm:$false
+
+        $module.Result.changed = $true
+    }
+    catch {
+        $module.FailJson("Failed to set changed parameters for scope '$scopeId'", $Error[0])
     }
 }
 
