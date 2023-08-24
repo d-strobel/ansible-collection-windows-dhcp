@@ -13,6 +13,7 @@ $spec = @{
         option_id    = @{ type = "int"; required = $true }
         vendor_class = @{ type = "str" }
         type         = @{ type = "str"; choices = "byte", "word", "dword", "dworddword", "ipv4address", "string", "binarydata", "encapsulateddata"; required = $true }
+        multi_valued = @{ type = "bool"; default = $false }
         state        = @{ type = "str"; choices = "absent", "present" ; default = "present" }
     }
 
@@ -27,6 +28,7 @@ $description = $module.Params.description
 $optionID = $module.Params.option_id
 $vendorClass = $module.Params.vendor_class
 $type = $module.Params.type
+$multiValued = $module.Params.multi_valued
 $state = $module.Params.state
 
 # ErrorAction
@@ -72,6 +74,7 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
                 -Type $type `
                 -OptionID $optionID `
                 -Description $description `
+                -MultiValued:$multiValued `
                 -Confirm:$false
         }
         else {
@@ -80,6 +83,7 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
                 -Type $type `
                 -OptionID $optionID `
                 -Description $description `
+                -MultiValued:$multiValued `
                 -VendorClass $vendorclass `
                 -Confirm:$false
         }
@@ -95,7 +99,8 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
 # Compare changes
 if (
     ($dhcpServerOptionDefinition.Type -ne $type) -or
-    ($dhcpServerOptionDefinition.Description.Trim() -ne $description)
+    ($dhcpServerOptionDefinition.Description.Trim() -ne $description) -or
+    ($dhcpServerOptionDefinition.MultiValued -ne $multiValued)
 ) {
     try {
         if ($vendorClass) {
@@ -104,6 +109,7 @@ if (
                 -Type $type `
                 -OptionID $optionID `
                 -Description $description `
+                -MultiValued:$multiValued `
                 -Confirm:$false
         }
         else {
@@ -112,6 +118,7 @@ if (
                 -Type $type `
                 -OptionID $optionID `
                 -Description $description `
+                -MultiValued:$multiValued `
                 -VendorClass $vendorclass `
                 -Confirm:$false
         }
