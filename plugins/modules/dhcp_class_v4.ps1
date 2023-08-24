@@ -8,7 +8,7 @@
 
 $spec = @{
     options             = @{
-        name        = @{ type = "str" }
+        name        = @{ type = "str"; required = $true }
         data        = @{ type = "str" }
         description = @{ type = "str" }
         type        = @{ type = "str"; choices = "user", "vendor"; required = $true }
