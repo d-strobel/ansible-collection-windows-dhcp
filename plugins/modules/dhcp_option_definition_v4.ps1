@@ -53,10 +53,10 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "absent")) {
 if (($null -ne $dhcpServerOptionDefinition) -and ($state -eq "absent")) {
     try {
         if ($vendorClass) {
-            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -Confirm:$false | Out-Null
+            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -VendorClass $vendorClass -Confirm:$false | Out-Null
         }
         else {
-            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -VendorClass $vendorclass -Confirm:$false | Out-Null
+            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -Confirm:$false | Out-Null
         }
 
         $module.Result.changed = $true
