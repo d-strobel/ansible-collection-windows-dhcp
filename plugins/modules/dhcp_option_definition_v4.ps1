@@ -8,13 +8,14 @@
 
 $spec = @{
     options             = @{
-        name         = @{ type = "str"; required = $true }
-        description  = @{ type = "str" }
-        option_id    = @{ type = "int"; required = $true }
-        vendor_class = @{ type = "str" }
-        type         = @{ type = "str"; choices = "byte", "word", "dword", "dworddword", "ipv4address", "string", "binarydata", "encapsulateddata"; required = $true }
-        multi_valued = @{ type = "bool"; default = $false }
-        state        = @{ type = "str"; choices = "absent", "present" ; default = "present" }
+        name          = @{ type = "str"; required = $true }
+        description   = @{ type = "str" }
+        option_id     = @{ type = "int"; required = $true }
+        vendor_class  = @{ type = "str" }
+        type          = @{ type = "str"; choices = "byte", "word", "dword", "dworddword", "ipv4address", "string", "binarydata", "encapsulateddata"; required = $true }
+        multi_valued  = @{ type = "bool"; default = $false }
+        default_value = @{ type = "str" }
+        state         = @{ type = "str"; choices = "absent", "present" ; default = "present" }
     }
 
     supports_check_mode = $false
@@ -29,6 +30,7 @@ $optionID = $module.Params.option_id
 $vendorClass = $module.Params.vendor_class
 $type = $module.Params.type
 $multiValued = $module.Params.multi_valued
+$defaultValue = $module.Params.default_value
 $state = $module.Params.state
 
 # ErrorAction
@@ -36,10 +38,10 @@ $ErrorActionPreference = 'Stop'
 
 # Get VendorClass
 if ($vendorClass) {
-    $dhcpServerOptionDefinition = Get-DhcpServerv4OptionDefinition -Type $type -Name $name -VendorClass $vendorclass -ErrorAction SilentlyContinue
+    $dhcpServerOptionDefinition = Get-DhcpServerv4OptionDefinition -OptionID $optionID -VendorClass $vendorClass -ErrorAction SilentlyContinue
 }
 else {
-    $dhcpServerOptionDefinition = Get-DhcpServerv4OptionDefinition -Type $type -Name $name -ErrorAction SilentlyContinue
+    $dhcpServerOptionDefinition = Get-DhcpServerv4OptionDefinition -OptionID $optionID -ErrorAction SilentlyContinue
 }
 
 # Early exit
@@ -51,17 +53,17 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "absent")) {
 if (($null -ne $dhcpServerOptionDefinition) -and ($state -eq "absent")) {
     try {
         if ($vendorClass) {
-            Remove-DhcpServerv4OptionDefinition -Type $type -Name $name -Confirm:$false | Out-Null
+            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -Confirm:$false | Out-Null
         }
         else {
-            Remove-DhcpServerv4OptionDefinition -Type $type -Name $name -VendorClass $vendorclass -Confirm:$false | Out-Null
+            Remove-DhcpServerv4OptionDefinition -OptionID $optionID -VendorClass $vendorclass -Confirm:$false | Out-Null
         }
 
         $module.Result.changed = $true
         $module.ExitJson()
     }
     catch {
-        $module.FailJson("Failed to remove the dhcp option definition '$name'", $Error[0])
+        $module.FailJson("Failed to remove the dhcp option definition '$name' with the option_id '$optionID'", $Error[0])
     }
 }
 
@@ -75,6 +77,8 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
                 -OptionID $optionID `
                 -Description $description `
                 -MultiValued:$multiValued `
+                -VendorClass $vendorclass `
+                -DefaultValue $defaultValue `
                 -Confirm:$false
         }
         else {
@@ -84,7 +88,7 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
                 -OptionID $optionID `
                 -Description $description `
                 -MultiValued:$multiValued `
-                -VendorClass $vendorclass `
+                -DefaultValue $defaultValue `
                 -Confirm:$false
         }
 
@@ -92,41 +96,39 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
         $module.ExitJson()
     }
     catch {
-        $module.FailJson("Failed to add the dhcp option definition '$name'", $Error[0])
+        $module.FailJson("Failed to add the dhcp option definition '$name' with the option_id '$optionID'", $Error[0])
     }
 }
 
 # Compare changes
 if (
-    ($dhcpServerOptionDefinition.Type -ne $type) -or
+    ($dhcpServerOptionDefinition.Name -ne $name) -or
     ($dhcpServerOptionDefinition.Description.Trim() -ne $description) -or
-    ($dhcpServerOptionDefinition.MultiValued -ne $multiValued)
+    ($dhcpServerOptionDefinition.DefaultValue.Trim() -ne $defaultValue)
 ) {
     try {
         if ($vendorClass) {
             Set-DhcpServerv4OptionDefinition `
                 -Name $name `
-                -Type $type `
                 -OptionID $optionID `
                 -Description $description `
-                -MultiValued:$multiValued `
+                -VendorClass $vendorclass `
+                -DefaultValue $defaultValue `
                 -Confirm:$false
         }
         else {
             Set-DhcpServerv4OptionDefinition `
                 -Name $name `
-                -Type $type `
                 -OptionID $optionID `
                 -Description $description `
-                -MultiValued:$multiValued `
-                -VendorClass $vendorclass `
+                -DefaultValue $defaultValue `
                 -Confirm:$false
         }
 
         $module.Result.changed = $true
     }
     catch {
-        $module.FailJson("Failed to set changed parameters for dhcp option definition '$name'", $Error[0])
+        $module.FailJson("Failed to set changed parameters for dhcp option definition '$name' with the option_id '$optionID'", $Error[0])
     }
 }
 
