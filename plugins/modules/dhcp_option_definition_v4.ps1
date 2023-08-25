@@ -100,6 +100,14 @@ if (($null -eq $dhcpServerOptionDefinition) -and ($state -eq "present")) {
     }
 }
 
+# Fail if user tries to change the following parameters
+if ($dhcpServerOptionDefinition.Type -ne $type) {
+    $module.FailJson("It is not possible to change the 'type' of the option definition.")
+}
+if ($dhcpServerOptionDefinition.MultiValued -ne $multiValued) {
+    $module.FailJson("It is not possible to change the parameter 'multi_valued' for the option definition.")
+}
+
 # Compare changes
 if (
     ($dhcpServerOptionDefinition.Name -ne $name) -or
